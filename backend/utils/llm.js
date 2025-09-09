@@ -66,7 +66,7 @@ ${(candidate.resumeText||'').slice(0, 8000)}`
         { role: 'system', content: 'Return strict JSON only.' },
         { role: 'user', content: prompt }
       ],
-      temperature: 0.2,
+      temperature: 0.1,
       response_format: { type: 'json_object' }
     })
   })

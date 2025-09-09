@@ -23,10 +23,10 @@ app.use('/api/ats', atsRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/precheck', precheckRoutes)
 
-const PORT = process.env.PORT || 5199
+const PORT = process.env.PORT || 3000;
 
 mongoose.connect(process.env.MONGO_URL).then(()=>{
-  app.listen(PORT, ()=> console.log('API running on http://localhost:'+PORT))
+  app.listen(PORT, ()=> console.log('API running on :'+PORT))
 }).catch(err => {
   console.error('Mongo connection error:', err.message)
   process.exit(1)

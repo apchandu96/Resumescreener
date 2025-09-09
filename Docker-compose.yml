@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:6
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env         # <— your real backend env (copied)
+    environment:
+      # Force the API to use the dockerized mongo, not localhost
+      MONGO_URI: mongodb://mongo:27017/screening
+      PORT: 3000
+      NODE_ENV: production
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"                # reachable on server's port 80
+    depends_on:
+      - api
+
+volumes:
+  mongo_data:
