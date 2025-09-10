@@ -25,6 +25,11 @@ app.use('/api/precheck', precheckRoutes)
 
 const PORT = process.env.PORT || 3000;
 
+//Check for health remove later
+app.get('/health', (req, res) => res.status(200).send('ok'));
+app.listen(PORT, '0.0.0.0', () => console.log('API listening on', PORT));
+
+
 mongoose.connect(process.env.MONGO_URL).then(()=>{
   app.listen(PORT, ()=> console.log('API running on :'+PORT))
 }).catch(err => {
