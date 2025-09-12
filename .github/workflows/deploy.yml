@@ -1,0 +1,40 @@
+name: Deploy over SSH
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            cd "${{ secrets.APP_DIR }}"
+
+            # Pull latest code
+            git fetch --all --prune
+            git reset --hard origin/main
+
+            # Build & restart containers
+            docker compose up -d --build
+
+            # Health check (adjust if needed)
+            curl -fsS http://localhost/api/health
+
+            # Optional: reclaim disk space
+            docker image prune -f
