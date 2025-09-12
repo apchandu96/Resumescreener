@@ -16,26 +16,31 @@ jobs:
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
+        env:                          # map repo secrets -> runner env vars (case-sensitive)
+          APP_DIR:  ${{ secrets.APP_DIR }}
+          ACC_USER: ${{ secrets.ACC_USER }}
+          ACC_PAT:  ${{ secrets.ACC_PAT }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          envs: APP_DIR,ACC_USER,ACC_PAT
+          envs: APP_DIR,ACC_USER,ACC_PAT      # forward these env vars to the remote shell
           script_stop: true
           script: |
             set -euo pipefail
-            cd "${{ secrets.APP_DIR }}"
-            AUTH=$(printf "%s:%s" "$ACC_USER" "$ACC_PAT" | base64 | tr -d '\n')
-            # Pull latest code
-            git fetch --all --prune
+            cd "$APP_DIR"
+
+            # Assert vars are present (helps avoid "unbound variable" errors)
+            : "${ACC_USER:?ACC_USER missing}"
+            : "${ACC_PAT:?ACC_PAT missing}"
+
+            # Build Basic auth header "username:PAT"
+            AUTH="$(printf '%s:%s' "$ACC_USER" "$ACC_PAT" | base64 | tr -d '\n')"
+
+            # Use the header ONLY for this fetch; nothing is persisted on disk
+            git -c http.extraheader="Authorization: Basic ${AUTH}" fetch --all --prune
             git reset --hard origin/main
 
-            # Build & restart containers
             docker compose up -d --build
-
-            # Health check (adjust if needed)
             curl -fsS http://localhost/api/health
-
-            # Optional: reclaim disk space
-            docker image prune -f
