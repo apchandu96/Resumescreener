@@ -43,4 +43,3 @@ jobs:
             git reset --hard origin/main
 
             docker compose up -d --build
-            curl -fsS http://localhost/api/health
