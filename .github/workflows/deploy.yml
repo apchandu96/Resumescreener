@@ -26,7 +26,7 @@ jobs:
           script: |
             set -euo pipefail
             cd "${{ secrets.APP_DIR }}"
-
+            AUTH=$(printf "%s:%s" "$ACC_USER" "$ACC_PAT" | base64 | tr -d '\n')
             # Pull latest code
             git fetch --all --prune
             git reset --hard origin/main
