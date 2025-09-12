@@ -21,6 +21,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
+          envs: APP_DIR,ACC_USER,ACC_PAT
           script_stop: true
           script: |
             set -euo pipefail
