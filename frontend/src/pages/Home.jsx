@@ -54,7 +54,7 @@ export default function Home() {
               <li>Reasons for the score</li>
             </ul>
           </li>
-          <li><span className="font-medium">Review history</span> — only your last 3 runs are kept for each CV/role.</li>
+          <li><span className="font-medium">Review history</span> — only your last runs are kept for each CV/role.</li>
         </ol>
       </div>
 
