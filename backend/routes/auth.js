@@ -81,21 +81,19 @@ router.post('/forgot', async (req, res) => {
  */
 router.post('/reset', async (req, res) => {
   try {
-    const { token, password, confirmPassword } = req.body
-    if (!token || !password || !confirmPassword) {
-      return res.status(400).send('Token, password, and confirmPassword are required')
+    const { email, newPassword,token  } = req.body
+    if (!token || !newPassword || !email) {
+      console.log(req.body);
+      return res.status(400).send('Token, password, and email are required')
     }
-    if (password !== confirmPassword) {
-      return res.status(400).send('Passwords do not match')
-    }
-
+    
     const user = await User.findOne({
       resetToken: token,
       resetExpires: { $gt: new Date() } // not expired
     })
     if (!user) return res.status(400).send('Invalid or expired reset token')
 
-    user.password = await bcrypt.hash(password, 10)
+    user.password = await bcrypt.hash(newPassword, 10)
     user.resetToken = null
     user.resetExpires = null
     await user.save()

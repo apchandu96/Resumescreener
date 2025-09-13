@@ -111,8 +111,7 @@ router.get('/search', async (req, res) => {
       return res.status(r.status).json({ error: 'Reed upstream error', details: text })
     }
     const data = await r.json()
-    console.log(res.json(data));
-    res.json(data)
+    return res.json(data);
   } catch (e) {
     console.error('Job search failed:', e)
     res.status(500).json({ error: 'Job search failed' })

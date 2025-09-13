@@ -123,15 +123,18 @@ export async function forgotPassword(email) {
   return r.json() // { ok:true, resetToken? }
 }
 
-export async function resetPassword(token, password, confirmPassword) {
-  const r = await fetch(`${BASE}/api/auth/reset`, {
+// api.js
+export async function resetPassword({ email, token, newPassword }) {
+  const resp = await fetch(`${BASE}/api/auth/reset`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token, password, confirmPassword })
-  })
-  if (!r.ok) throw new Error(await r.text())
-  return r.json() // { ok:true }
+    body: JSON.stringify({ email, token, newPassword }),
+  });
+  const text = await resp.text();
+  if (!resp.ok) throw new Error(text || 'Reset failed');
+  try { return JSON.parse(text); } catch { return { ok: true }; }
 }
+
 // Add this to your existing api.js
 export async function precheckCandidate(candidateId, roleId) {
   const r = await fetch(`${BASE}/api/precheck`, {

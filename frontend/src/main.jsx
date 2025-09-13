@@ -26,8 +26,8 @@ createRoot(document.getElementById('root')).render(
         <Route path="register" element={<Register />} />
         <Route path="forgot" element={<ForgotPassword />} />
         <Route path="reset" element={<ResetPassword />} />
-        <Route path="/jobs" element={<JobSearch/>} />
-        <Route path='/resetpassword' element={<ResetPassword/>}/>
+        <Route path="jobs" element={<JobSearch/>} />
+        <Route path='resetpassword' element={<ResetPassword/>}/>
         <Route
           path="cv"
           element={

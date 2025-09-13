@@ -20,6 +20,7 @@ export default function App() {
                 <Link to="/cv" className="hover:underline">My CV</Link>
                 <Link to="/roles" className="hover:underline">Job Roles</Link>
                 <Link to="/screening" className="hover:underline">Screening</Link>
+                <Link to="/jobs" className="hover:underline">Job Search</Link>
                 <button
                   onClick={logout}
                   className="ml-3 bg-red-500 hover:bg-red-600 px-3 py-1 rounded"
