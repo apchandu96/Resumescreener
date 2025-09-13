@@ -31,6 +31,7 @@ export default function App() {
               <>
                 <Link to="/login" className="hover:underline">Login</Link>
                 <Link to="/register" className="hover:underline">Register</Link>
+                <Link to="/jobs" className="hover:underline">Job Search</Link>
               </>
             )}
           </nav>

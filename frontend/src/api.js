@@ -142,3 +142,17 @@ export async function precheckCandidate(candidateId, roleId) {
   if (!r.ok) throw new Error(await r.text())
   return r.json()
 }
+
+export async function searchJobs(params = {}) {
+  const query = new URLSearchParams(params).toString()
+  const r = await fetch(`${BASE}/api/jobs/search?${query}`)
+  if (!r.ok) throw new Error(await r.text())
+  return r.json()
+}
+
+// Where am I (optional — for showing detected city)
+export async function whereAmI() {
+  const r = await fetch(`${BASE}/api/jobs/whereami`)
+  if (!r.ok) throw new Error(await r.text())
+  return r.json()
+}

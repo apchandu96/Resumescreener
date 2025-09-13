@@ -20,6 +20,7 @@ export default function NavBar(){
             <Link to="/cv" className="hover:underline">My CV</Link>
             <Link to="/roles" className="hover:underline">Job Roles</Link>
             <Link to="/screening" className="hover:underline">Screening</Link>
+            
             <button
               onClick={logout}
               className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm"
@@ -32,6 +33,7 @@ export default function NavBar(){
           <>
             <Link to="/login" className="hover:underline">Login</Link>
             <Link to="/register" className="hover:underline">Register</Link>
+            <Link to="/jobs" className="hover:underline">Job Search</Link>
           </>
         )}
       </div>

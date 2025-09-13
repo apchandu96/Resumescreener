@@ -9,6 +9,7 @@ import ResetPassword from './pages/ResetPassword'
 import MyCV from './pages/MyCV'
 import JobRoles from './pages/JobRoles'
 import Screening from './pages/Screening'
+import JobSearch from './pages/JobSearch'
 import './index.css'
 
 function PrivateRoute({ children }) {
@@ -25,7 +26,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="register" element={<Register />} />
         <Route path="forgot" element={<ForgotPassword />} />
         <Route path="reset" element={<ResetPassword />} />
-
+<Route path="/jobs" element={<JobSearch/>} />
         <Route
           path="cv"
           element={

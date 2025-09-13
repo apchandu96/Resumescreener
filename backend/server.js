@@ -8,6 +8,7 @@ import screeningRouter from './routes/screening.js'
 import atsRouter from './routes/ats.js'
 import authRouter from './routes/auth.js'
 import precheckRoutes from './routes/precheck.js'
+import jobsRouter from './routes/jobs.js'
 
 dotenv.config()
 const app = express()
@@ -22,6 +23,7 @@ app.use('/api/screen', screeningRouter)
 app.use('/api/ats', atsRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/precheck', precheckRoutes)
+app.use('/api/jobs', jobsRouter)
 
 const PORT = process.env.PORT || 3000;
 
