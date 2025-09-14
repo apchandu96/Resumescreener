@@ -13,7 +13,15 @@ export default function App() {
     <div>
       <header className="bg-slate-800 text-white">
         <div className="container py-4 flex items-center justify-between">
-          <Link to="/" className="font-bold">Resume Screener</Link>
+          <Link to="/" className="flex items-center gap-2 font-bold text-lg">
+            <img
+              src='/images/logo.png'
+              alt="CV Craft Logo"
+              className="h-8 w-8 object-contain"
+            />
+            <span>CV Craft</span>
+          </Link>
+
           <nav className="space-x-4 text-sm">
             {token ? (
               <>

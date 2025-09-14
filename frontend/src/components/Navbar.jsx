@@ -12,7 +12,7 @@ export default function NavBar(){
   return (
     <nav className="bg-slate-800 text-white px-4 py-3 flex justify-between items-center">
       <div className="font-bold text-lg">
-        <Link to="/">Resume Screener</Link>
+        <Link to="/">CV Craft</Link>
       </div>
       <div className="flex gap-4 items-center">
         {token && (

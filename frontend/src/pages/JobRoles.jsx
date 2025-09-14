@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { extractSkills, createRole, listRoles } from '../api'
+import { extractSkills, createRole, listRoles, deleteRole } from '../api'
 
 export default function JobRoles() {
   const navigate = useNavigate()
@@ -9,37 +9,44 @@ export default function JobRoles() {
   const SCREEN_PATH = '/screening'
 
   const [title, setTitle] = useState('Frontend Engineer (React)')
-  const [desc, setDesc] = useState('Build delightful product experiences with React and modern tooling.')
+  const [desc, setDesc] = useState('')
   const [must, setMust] = useState([])
   const [good, setGood] = useState([])
   const [warning, setWarning] = useState(null)
   const [roles, setRoles] = useState([])
+
   const [saving, setSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
 
   const load = async () => setRoles(await listRoles())
   useEffect(() => { load() }, [])
 
-  const onExtract = async () => {
-    setWarning(null)
-    try {
-      const r = await extractSkills(title, desc)
-      setMust(r.mustHaveSkills || [])
-      setGood(r.goodToHaveSkills || [])
-    } catch (err) {
-      setWarning(String(err))
-    }
-  }
-
   const onSave = async () => {
+    if (!title?.trim() || !desc?.trim()) {
+      return setWarning('Please provide both a role title and the key roles & responsibilities.')
+    }
+
     setSaving(true); setWarning(null)
     try {
+      // 1) Auto-extract skills from the JD (no manual button)
+      const extracted = await extractSkills(title, desc)
+      const mustHaveSkills = extracted?.mustHaveSkills || []
+      const goodToHaveSkills = extracted?.goodToHaveSkills || []
+
+      // reflect in UI (optional)
+      setMust(mustHaveSkills)
+      setGood(goodToHaveSkills)
+
+      // 2) Save role with extracted skills
       const role = await createRole({
         title,
         description: desc,
-        mustHaveSkills: must,
-        goodToHaveSkills: good
+        mustHaveSkills,
+        goodToHaveSkills
       })
+
       await load()
+
       if (confirm('Role saved. Would you like to screen against this role now?')) {
         navigate(`${SCREEN_PATH}?roleId=${role._id}`)
       }
@@ -47,6 +54,29 @@ export default function JobRoles() {
       setWarning(String(err))
     } finally {
       setSaving(false)
+    }
+  }
+
+  const onDelete = async (roleId) => {
+    if (!roleId) return
+    const go = window.confirm('Delete this role? Any related screening results will also be removed.')
+    if (!go) return
+
+    setDeletingId(roleId)
+    setWarning(null)
+
+    // optimistic update
+    const prev = roles
+    setRoles(prev => prev.filter(r => r._id !== roleId))
+
+    try {
+      await deleteRole(roleId)
+    } catch (err) {
+      // rollback
+      setRoles(prev)
+      setWarning(String(err))
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -69,23 +99,32 @@ export default function JobRoles() {
               className="input"
               value={title}
               onChange={e => setTitle(e.target.value)}
+              placeholder="e.g., Frontend Engineer (React)"
               required
             />
           </div>
+
           <div>
-            <label className="label" htmlFor="desc">Job Description</label>
+            <div className="flex items-baseline justify-between">
+              <label className="label" htmlFor="desc">Key Roles & Responsibilities</label>
+              <span className="text-xs text-slate-500">
+                No company info required — focus on <b>essential</b> and <b>preferred</b> skills.
+              </span>
+            </div>
             <textarea
               id="desc"
               className="textarea"
               value={desc}
               onChange={e => setDesc(e.target.value)}
+              placeholder="Describe the responsibilities and list essential (must-have) and preferred (good-to-have) skills."
               required
             />
           </div>
+
           <div className="flex gap-3">
-            <button className="btn" onClick={onExtract}>Extract skills from JD</button>
+            {/* Extract button removed; save triggers extraction automatically */}
             <button className="btn" onClick={onSave} disabled={saving || !title || !desc}>
-              {saving ? 'Saving...' : 'Add Role'}
+              {saving ? 'Analyzing JD & Saving…' : 'Add Role'}
             </button>
           </div>
         </div>
@@ -132,22 +171,36 @@ export default function JobRoles() {
                 </tr>
               </thead>
               <tbody>
-                {roles.map(r => (
-                  <tr key={r._id} className="border-t">
-                    <td className="py-2 pr-4">{r.title}</td>
-                    <td className="py-2 pr-4">
-                      {(r.mustHaveSkills || []).map(s => <span key={s} className="pill">{s}</span>)}
-                    </td>
-                    <td className="py-2 pr-4">
-                      <button
-                        className="btn btn-sm"
-                        onClick={() => navigate(`${SCREEN_PATH}?roleId=${r._id}`)}
-                      >
-                        Screen against this role
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {roles.map(r => {
+                  const isDeleting = deletingId === r._id
+                  return (
+                    <tr key={r._id} className="border-t">
+                      <td className="py-2 pr-4">{r.title}</td>
+                      <td className="py-2 pr-4">
+                        {(r.mustHaveSkills || []).map(s => <span key={s} className="pill">{s}</span>)}
+                      </td>
+                      <td className="py-2 pr-4">
+                        <div className="flex gap-2">
+                          <button
+                            className="btn btn-sm"
+                            onClick={() => navigate(`${SCREEN_PATH}?roleId=${r._id}`)}
+                            disabled={isDeleting}
+                          >
+                            Screen against this role
+                          </button>
+                          <button
+                            className="btn btn-sm btn-outline"
+                            onClick={() => onDelete(r._id)}
+                            disabled={isDeleting}
+                            title="Delete this role"
+                          >
+                            {isDeleting ? 'Deleting…' : 'Delete'}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

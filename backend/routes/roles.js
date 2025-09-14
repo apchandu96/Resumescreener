@@ -2,6 +2,7 @@
 import express from 'express'
 import { auth } from '../middleware/auth.js'
 import JobRole from '../models/JobRole.js'
+import ScreeningResult from '../models/ScreeningResult.js'
 import { extractSkillsLLM } from '../utils/llm.js'
 
 const router = express.Router()
@@ -46,6 +47,27 @@ router.post('/', auth, async (req, res) => {
 router.get('/', auth, async (req, res) => {
   const roles = await JobRole.find({ userId: req.userId }).sort({ createdAt: -1 })
   res.json(roles)
+})
+
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const { id } = req.params
+
+    // verify ownership
+    const role = await JobRole.findOne({ _id: id, userId: req.userId })
+    if (!role) return res.status(404).send('Role not found')
+
+    // remove related screening snapshots (latest-only schema or legacy)
+    await ScreeningResult.deleteMany({ userId: req.userId, roleId: id })
+
+    // delete role
+    await role.deleteOne()
+
+    return res.json({ ok: true })
+  } catch (err) {
+    const status = err.status || 500
+    return res.status(status).send(err.message || 'Failed to delete role')
+  }
 })
 
 export default router

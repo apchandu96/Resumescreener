@@ -74,6 +74,19 @@ export async function listRoles() {
   return r.json()
 }
 
+export async function deleteRole(roleId) {
+  const res = await fetch(`${BASE}/api/roles/${roleId}`, {
+    method: 'DELETE',
+    headers: authHeaders({ 'Content-Type': 'application/json' }), 
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(()=> '')
+    throw new Error(text || `Failed to delete role ${roleId}`)
+  }
+  return res.json()
+}
+
+
 /* ---------- SCREENING ---------- */
 export async function screenCandidate(candidateId, roleId) {
   const r = await fetch(`${BASE}/api/screen`, {
@@ -102,6 +115,18 @@ export async function atsReportByCandidate(candidateId) {
   })
   if (!r.ok) throw new Error(await r.text())
   return r.json()
+}
+
+export async function deleteCandidate(candidateId) {
+  const res = await fetch(`${BASE}/api/candidates/${candidateId}`, {
+    method: 'DELETE',
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(()=>'')
+    throw new Error(text || `Failed to delete candidate ${candidateId}`)
+  }
+  return res.json()
 }
 
 export async function atsScoreByCandidate(candidateId) {

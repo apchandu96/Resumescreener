@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { listCandidates, listRoles, screenCandidate, screenHistory, precheckCandidate } from '../api'
+import { listCandidates, listRoles, screenCandidate, precheckCandidate } from '../api'
 
 function useQuery() {
   return new URLSearchParams(window.location.search)
@@ -16,8 +16,7 @@ export default function Screening() {
   const [roles, setRoles] = useState([])
   const [candidateId, setCandidateId] = useState(q.get('candidateId') || '')
   const [roleId, setRoleId] = useState(q.get('roleId') || '')
-  const [res, setRes] = useState(null)
-  const [history, setHistory] = useState([])
+  const [res, setRes] = useState(null) // combined analysis from backend
   const [loading, setLoading] = useState(false)
   const [warning, setWarning] = useState(null)
 
@@ -48,20 +47,7 @@ export default function Screening() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Load last runs for the selected candidate
-  useEffect(() => {
-    if (!candidateId) return
-    ;(async () => {
-      try {
-        const h = await screenHistory(candidateId)
-        setHistory(h)
-      } catch (err) {
-        setWarning(String(err))
-      }
-    })()
-  }, [candidateId])
-
-  // Restore cached precheck (one-time)
+  // Restore cached precheck (one-time per candidate+role)
   useEffect(() => {
     setPrecheck(null)
     if (!candidateId || !roleId) return
@@ -111,15 +97,46 @@ export default function Screening() {
     setWarning(null)
     setRes(null)
     try {
+      // screenCandidate now returns a combined object:
+      // {
+      //   score, summary,
+      //   matched_must, missing_must,
+      //   matched_good, missing_good,
+      //   cv_suggestions, role_specific_gaps, flags,
+      //   ats: { score, issues, suggestions, signals:{} }
+      // }
       const r = await screenCandidate(candidateId, roleId)
       setRes(r)
-      const h = await screenHistory(candidateId)
-      setHistory(h)
     } catch (err) {
       setWarning(String(err))
     } finally {
       setLoading(false)
     }
+  }
+
+  const Stat = ({ label, value, strong=false }) => (
+    <div className="flex flex-col">
+      <span className="text-xs text-slate-500">{label}</span>
+      <span className={`text-base ${strong ? 'font-bold' : 'font-medium'}`}>{value}</span>
+    </div>
+  )
+
+  const PillList = ({ items = [] }) => {
+    if (!items.length) return <span className="text-slate-500">None</span>
+    return (
+      <div className="mt-1 flex flex-wrap gap-2">
+        {items.map(s => <span key={s} className="pill">{s}</span>)}
+      </div>
+    )
+  }
+
+  const List = ({ items = [] }) => {
+    if (!items.length) return <p className="text-slate-600">None</p>
+    return (
+      <ul className="list-disc list-inside space-y-1 text-slate-800">
+        {items.map((v, i) => <li key={i}>{v}</li>)}
+      </ul>
+    )
   }
 
   return (
@@ -235,17 +252,13 @@ export default function Screening() {
                   {precheck.missing?.must?.length ? (
                     <>
                       <h4 className="font-semibold">Missing must-have skills</h4>
-                      <div className="mt-1 flex flex-wrap gap-2">
-                        {precheck.missing.must.map(s => <span key={s} className="pill">{s}</span>)}
-                      </div>
+                      <PillList items={precheck.missing.must} />
                     </>
                   ) : null}
                   {precheck.missing?.certs?.length ? (
                     <>
                       <h4 className="font-semibold mt-3">Missing required certifications</h4>
-                      <div className="mt-1 flex flex-wrap gap-2">
-                        {precheck.missing.certs.map(s => <span key={s} className="pill">{s}</span>)}
-                      </div>
+                      <PillList items={precheck.missing.certs} />
                     </>
                   ) : null}
                 </>
@@ -274,34 +287,118 @@ export default function Screening() {
         </div>
       )}
 
-      {/* Last run card (unchanged except title) */}
-      <div className="card">
-        <h3 className="text-lg font-semibold mb-2">Last run</h3>
-        {history.length === 0 ? (
-          <p className="text-slate-600">No runs yet.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="text-left">
-                  <th className="py-2 pr-4">When</th>
-                  <th className="py-2 pr-4">Score</th>
-                  <th className="py-2 pr-4">Summary</th>
-                </tr>
-              </thead>
-              <tbody>
-                {history.map(h => (
-                  <tr key={h._id} className="border-t">
-                    <td className="py-2 pr-4">{new Date(h.createdAt).toLocaleString()}</td>
-                    <td className="py-2 pr-4">{h.score}</td>
-                    <td className="py-2 pr-4">{h.summary}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Screening result (detailed) */}
+      {res && (
+        <div className="card">
+          <div className="flex items-start justify-between gap-4 mb-2">
+            <h3 className="text-lg font-semibold">Screening result</h3>
+            <div className="flex gap-6">
+              <Stat label="Fit score" value={`${res.score ?? 0}/100`} strong />
+              <Stat label="ATS score" value={`${res.ats?.score ?? 0}/100`} />
+            </div>
           </div>
-        )}
-      </div>
+
+          {res.summary ? (
+            <p className="text-slate-800 mb-4">{res.summary}</p>
+          ) : null}
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Skills breakdown */}
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold">Must-have skills</h4>
+                <div className="mt-2 rounded-lg border p-3">
+                  <div>
+                    <div className="text-sm font-medium text-emerald-700">Present</div>
+                    <PillList items={res.matched_must || []} />
+                  </div>
+                  <div className="mt-3">
+                    <div className="text-sm font-medium text-amber-700">Missing</div>
+                    <PillList items={res.missing_must || []} />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold">Good-to-have skills</h4>
+                <div className="mt-2 rounded-lg border p-3">
+                  <div>
+                    <div className="text-sm font-medium text-emerald-700">Present</div>
+                    <PillList items={res.matched_good || []} />
+                  </div>
+                  <div className="mt-3">
+                    <div className="text-sm font-medium text-amber-700">Missing</div>
+                    <PillList items={res.missing_good || []} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Gaps & suggestions */}
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold">Role-specific gaps</h4>
+                <div className="mt-2 rounded-lg border p-3">
+                  <List items={res.role_specific_gaps || []} />
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold">Concrete CV suggestions</h4>
+                <div className="mt-2 rounded-lg border p-3">
+                  <List items={res.cv_suggestions || []} />
+                </div>
+              </div>
+
+              {res.flags?.length ? (
+                <div>
+                  <h4 className="font-semibold">Flags / risks</h4>
+                  <div className="mt-2 rounded-lg border p-3">
+                    <List items={res.flags} />
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          {/* ATS section */}
+          <div className="mt-6">
+            <h4 className="font-semibold">ATS audit</h4>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-2">
+              <div className="rounded-lg border p-3">
+                <div className="text-sm font-medium mb-1">Issues</div>
+                <List items={res.ats?.issues || []} />
+              </div>
+              <div className="rounded-lg border p-3">
+                <div className="text-sm font-medium mb-1">Suggestions</div>
+                <List items={res.ats?.suggestions || []} />
+              </div>
+              <div className="rounded-lg border p-3">
+                <div className="text-sm font-medium mb-1">Signals</div>
+                <div className="text-sm text-slate-700 space-y-1">
+                  <div>Has Email: <b>{String(res.ats?.signals?.hasEmail ?? false)}</b></div>
+                  <div>Has Phone: <b>{String(res.ats?.signals?.hasPhone ?? false)}</b></div>
+                  <div>Has Summary: <b>{String(res.ats?.signals?.hasSummary ?? false)}</b></div>
+                  <div>Has Experience: <b>{String(res.ats?.signals?.hasExperience ?? false)}</b></div>
+                  <div>Has Education: <b>{String(res.ats?.signals?.hasEducation ?? false)}</b></div>
+                  <div>Has Skills: <b>{String(res.ats?.signals?.hasSkills ?? false)}</b></div>
+                  {'bulletCount' in (res.ats?.signals || {}) && (
+                    <div>Bullet Count: <b>{res.ats.signals.bulletCount}</b></div>
+                  )}
+                  {'estimatedWords' in (res.ats?.signals || {}) && (
+                    <div>Estimated Words: <b>{res.ats.signals.estimatedWords}</b></div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 flex gap-2">
+            <button className="btn" onClick={() => onRun(true)}>Re-run screening</button>
+            <button className="btn btn-outline" onClick={() => navigate(ROLES_PATH)}>Adjust role</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

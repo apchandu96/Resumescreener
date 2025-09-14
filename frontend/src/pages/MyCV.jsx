@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { uploadCandidate, listCandidates, atsReportByCandidate, atsScoreByCandidate } from '../api'
+import { uploadCandidate, listCandidates, atsReportByCandidate, atsScoreByCandidate, deleteCandidate } from '../api'
 
 export default function MyCV(){
   const [file, setFile] = useState(null)
@@ -14,6 +14,9 @@ export default function MyCV(){
   const [deepMap, setDeepMap] = useState({})     // candidateId -> deep report
   const [deepLoadingId, setDeepLoadingId] = useState(null)
   const [deepErrorId, setDeepErrorId] = useState(null)
+
+  // Deletion state
+  const [deletingId, setDeletingId] = useState(null)
 
   const load = async () => setCands(await listCandidates())
   useEffect(()=>{ load() }, [])
@@ -38,9 +41,7 @@ export default function MyCV(){
         try {
           const report = await atsReportByCandidate(created._id)
           setBasicMap(prev => ({ ...prev, [created._id]: report }))
-        } catch (e) {
-          // non-fatal; basic report failed
-        }
+        } catch { /* non-fatal; basic report failed */ }
       }
     }catch(err){ setWarning(String(err)) }
     finally{ setLoading(false) }
@@ -57,6 +58,37 @@ export default function MyCV(){
       setDeepMap(prev => ({ ...prev, [candidateId]: { error: String(err) } }))
     }finally{
       setDeepLoadingId(null)
+    }
+  }
+
+  const onDelete = async (candidateId) => {
+    if (!candidateId) return
+    const go = window.confirm('Delete this CV permanently? This cannot be undone.')
+    if (!go) return
+
+    setDeletingId(candidateId)
+    setWarning(null)
+
+    // optimistic update
+    const prevCands = cands
+    setCands(prev => prev.filter(x => x._id !== candidateId))
+    setBasicMap(prev => {
+      const { [candidateId]: _, ...rest } = prev
+      return rest
+    })
+    setDeepMap(prev => {
+      const { [candidateId]: _, ...rest } = prev
+      return rest
+    })
+
+    try{
+      await deleteCandidate(candidateId)
+    }catch(err){
+      // rollback if it fails
+      setCands(prevCands)
+      setWarning(String(err))
+    }finally{
+      setDeletingId(null)
     }
   }
 
@@ -93,6 +125,7 @@ export default function MyCV(){
               const deep = deepMap[c._id]
               const isDeepLoading = deepLoadingId === c._id
               const deepErr = deepErrorId === c._id && deep?.error
+              const isDeleting = deletingId === c._id
 
               return (
                 <li key={c._id} className="bg-slate-50 rounded-xl p-3">
@@ -105,8 +138,16 @@ export default function MyCV(){
                     </div>
                     <div className="flex gap-2">
                       <a className="btn" href={`/screening?candidateId=${c._id}`}>Screen this CV</a>
-                      <button className="btn" onClick={()=>deepDive(c._id)} disabled={isDeepLoading}>
+                      <button className="btn" onClick={()=>deepDive(c._id)} disabled={isDeepLoading || isDeleting}>
                         {isDeepLoading ? 'Analyzing...' : 'Deep Dive with AI'}
+                      </button>
+                      <button
+                        className="btn btn-outline"
+                        onClick={()=>onDelete(c._id)}
+                        disabled={isDeepLoading || isDeleting}
+                        title="Delete this CV"
+                      >
+                        {isDeleting ? 'Deleting…' : 'Delete'}
                       </button>
                     </div>
                   </div>
