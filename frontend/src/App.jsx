@@ -1,5 +1,5 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom'
-import NavBar from './components/navbar.jsx'
+import NavBar from './components/NavBar' 
 
 export default function App() {
   const nav = useNavigate()
