@@ -105,12 +105,8 @@ export default function MyCV(){
             <input id="cv" className="input" type="file" accept=".pdf" onChange={e=>setFile(e.target.files[0]||null)} required/>
           </div>
           <div>
-            <label className="label" htmlFor="name">Your name</label>
-            <input id="name" className="input" value={name} onChange={e=>setName(e.target.value)} placeholder="e.g., Jane Doe" required/>
-          </div>
-          <div>
-            <label className="label" htmlFor="years">Years of experience</label>
-            <input id="years" className="input" type="number" min="0" step="1" value={years} onChange={e=>setYears(e.target.value)} placeholder="e.g., 4" required/>
+            <label className="label" htmlFor="name">Nick name</label>
+            <input id="name" className="input" value={name} onChange={e=>setName(e.target.value)} placeholder="e.g., Mike's data analyst cv" required/>
           </div>
           <button className="btn" disabled={loading}>{loading?'Uploading...':'Upload CV'}</button>
         </form>

@@ -4,8 +4,7 @@ import { auth } from '../middleware/auth.js'
 import Candidate from '../models/Candidate.js'
 import JobRole from '../models/JobRole.js'
 import ScreeningResult from '../models/ScreeningResult.js'
-
-// ⬇️ Import the richer helper that builds the full payload (fit + ATS + detail)
+import { rateLimitSimple } from '../middleware/rateLimitSimple.js'
 import { screenCandidateCombined } from '../utils/llm.js'
 
 const router = express.Router()
@@ -22,41 +21,46 @@ const router = express.Router()
  *   ats: { score, issues, suggestions, signals:{} }
  * }
  */
-router.post('/', auth, async (req, res) => {
-  try {
-    const { candidateId, roleId } = req.body
-    if (!candidateId || !roleId) return res.status(400).send('candidateId and roleId required')
+router.post(
+  '/',
+  auth,
+  rateLimitSimple({ windowMs: 60_000, max: 10 }), // LLM-heavy
+  async (req, res) => {
+    try {
+      const { candidateId, roleId } = req.body
+      if (!candidateId || !roleId) return res.status(400).send('candidateId and roleId required')
 
-    // Ensure candidate & role belong to this user
-    const cand = await Candidate.findOne({ _id: candidateId, userId: req.userId })
-    const role = await JobRole.findOne({ _id: roleId, userId: req.userId })
-    if (!cand || !role) return res.status(404).send('Candidate or Role not found')
+      // Ensure candidate & role belong to this user
+      const cand = await Candidate.findOne({ _id: candidateId, userId: req.userId })
+      const role = await JobRole.findOne({ _id: roleId, userId: req.userId })
+      if (!cand || !role) return res.status(404).send('Candidate or Role not found')
 
-    // Build combined payload (fit + ATS + detailed breakdown)
-    const payload = await screenCandidateCombined(cand, role)
+      // Build combined payload (fit + ATS + detailed breakdown)
+      const payload = await screenCandidateCombined(cand, role)
 
-    // Upsert: keep only the latest for (userId, candidateId, roleId)
-    await ScreeningResult.updateOne(
-      { userId: req.userId, candidateId, roleId },
-      {
-        $set: {
-          lastScore: payload.score ?? 0,
-          lastPayload: payload,
-          updatedAt: new Date()
-        }
-      },
-      { upsert: true }
-    )
+      // Upsert: keep only the latest for (userId, candidateId, roleId)
+      await ScreeningResult.updateOne(
+        { userId: req.userId, candidateId, roleId },
+        {
+          $set: {
+            lastScore: payload.score ?? 0,
+            lastPayload: payload,
+            updatedAt: new Date()
+          }
+        },
+        { upsert: true }
+      )
 
-    return res.json(payload)
-  } catch (e) {
-    const status = e.status || 500
-    return res.status(status).json({
-      error: e.message || 'screening failed',
-      details: e.details || null
-    })
+      return res.json(payload)
+    } catch (e) {
+      const status = e.status || 500
+      return res.status(status).json({
+        error: e.message || 'screening failed',
+        details: e.details || null
+      })
+    }
   }
-})
+)
 
 /**
  * GET /screening/:candidateId?roleId=...
@@ -92,7 +96,6 @@ router.get('/:candidateId', auth, async (req, res) => {
       roleId: r.roleId,
       lastScore: r.lastScore ?? 0,
       updatedAt: r.updatedAt,
-      // small digest so a list view can show something meaningful if needed
       summary: r?.lastPayload?.summary || '',
       atsScore: r?.lastPayload?.ats?.score ?? null
     }))

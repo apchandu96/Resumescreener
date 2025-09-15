@@ -4,24 +4,30 @@ import { auth } from '../middleware/auth.js'
 import JobRole from '../models/JobRole.js'
 import ScreeningResult from '../models/ScreeningResult.js'
 import { extractSkillsLLM } from '../utils/llm.js'
+import { rateLimitSimple } from '../middleware/rateLimitSimple.js'
 
 const router = express.Router()
 
 // Extract-only (preview) — no save
-router.post('/extract', auth, async (req, res) => {
-  try {
-    const { title, description } = req.body
-    if (!title || !description) return res.status(400).send('Title and description required')
+router.post(
+  '/extract',
+  auth,
+  rateLimitSimple({ windowMs: 60_000, max: 10 }), // LLM call
+  async (req, res) => {
+    try {
+      const { title, description } = req.body
+      if (!title || !description) return res.status(400).send('Title and description required')
 
-    const { must_have_skills, good_to_have_skills } = await extractSkillsLLM(title, description)
-    res.json({
-      mustHaveSkills: must_have_skills || [],
-      goodToHaveSkills: good_to_have_skills || []
-    })
-  } catch (e) {
-    res.status(e.status || 500).json({ error: e.message, details: e.details || null })
+      const { must_have_skills, good_to_have_skills } = await extractSkillsLLM(title, description)
+      res.json({
+        mustHaveSkills: must_have_skills || [],
+        goodToHaveSkills: good_to_have_skills || []
+      })
+    } catch (e) {
+      res.status(e.status || 500).json({ error: e.message, details: e.details || null })
+    }
   }
-})
+)
 
 // Save role
 router.post('/', auth, async (req, res) => {
@@ -49,6 +55,7 @@ router.get('/', auth, async (req, res) => {
   res.json(roles)
 })
 
+// Delete role + cleanup
 router.delete('/:id', auth, async (req, res) => {
   try {
     const { id } = req.params
@@ -57,7 +64,7 @@ router.delete('/:id', auth, async (req, res) => {
     const role = await JobRole.findOne({ _id: id, userId: req.userId })
     if (!role) return res.status(404).send('Role not found')
 
-    // remove related screening snapshots (latest-only schema or legacy)
+    // remove related screening snapshots
     await ScreeningResult.deleteMany({ userId: req.userId, roleId: id })
 
     // delete role
