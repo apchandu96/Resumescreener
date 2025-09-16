@@ -146,7 +146,7 @@ export default function Screening() {
             >
               {cands.map(c => (
                 <option key={c._id} value={c._id}>
-                  {c.name} ({c.yearsExperience || 0} yrs)
+                  {c.name} {c.yearsOfExperience ? `(${c.yearsOfExperience} yrs exp)` : ''}
                 </option>
               ))}
             </select>
