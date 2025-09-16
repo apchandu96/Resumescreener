@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { listCandidates, listRoles, screenCandidate, screenHistory, precheckCandidate } from '../api'
+import { listCandidates, listRoles, screenCandidate, precheckCandidate } from '../api'
 import { AlertTriangle } from 'lucide-react'
 
 function useQuery() {
@@ -17,10 +17,10 @@ export default function Screening() {
   const [roles, setRoles] = useState([])
   const [candidateId, setCandidateId] = useState(q.get('candidateId') || '')
   const [roleId, setRoleId] = useState(q.get('roleId') || '')
-  const [res, setRes] = useState(null) // combined analysis from backend
+  const [res, setRes] = useState(null)
   const [loading, setLoading] = useState(false)
   const [warning, setWarning] = useState(null)
-  const [history, setHistory] = useState([])
+
   // Precheck state
   const [precheck, setPrecheck] = useState(null)
   const [prechecking, setPrechecking] = useState(false)
@@ -54,19 +54,6 @@ export default function Screening() {
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  // Load last runs for the selected candidate
-  useEffect(() => {
-    if (!candidateId) return
-    ;(async () => {
-      try {
-        const h = await screenHistory(candidateId)
-        setHistory(h)
-      } catch (err) {
-        setWarning(String(err))
-      }
-    })()
-  }, [candidateId])
 
   // Restore cached precheck
   useEffect(() => {
@@ -126,14 +113,6 @@ export default function Screening() {
     setWarning(null)
     setRes(null)
     try {
-      // screenCandidate now returns a combined object:
-      // {
-      //   score, summary,
-      //   matched_must, missing_must,
-      //   matched_good, missing_good,
-      //   cv_suggestions, role_specific_gaps, flags,
-      //   ats: { score, issues, suggestions, signals:{} }
-      // }
       const r = await screenCandidate(candidateId, roleId)
       setRes(r)
     } catch (err) {
@@ -141,31 +120,6 @@ export default function Screening() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const Stat = ({ label, value, strong=false }) => (
-    <div className="flex flex-col">
-      <span className="text-xs text-slate-500">{label}</span>
-      <span className={`text-base ${strong ? 'font-bold' : 'font-medium'}`}>{value}</span>
-    </div>
-  )
-
-  const PillList = ({ items = [] }) => {
-    if (!items.length) return <span className="text-slate-500">None</span>
-    return (
-      <div className="mt-1 flex flex-wrap gap-2">
-        {items.map(s => <span key={s} className="pill">{s}</span>)}
-      </div>
-    )
-  }
-
-  const List = ({ items = [] }) => {
-    if (!items.length) return <p className="text-slate-600">None</p>
-    return (
-      <ul className="list-disc list-inside space-y-1 text-slate-800">
-        {items.map((v, i) => <li key={i}>{v}</li>)}
-      </ul>
-    )
   }
 
   return (
@@ -232,7 +186,122 @@ export default function Screening() {
         </div>
       </div>
 
-      {/* Results, Precheck etc. remain unchanged */}
+      {/* ===== Precheck results card ===== */}
+      {precheck && (
+        <div className={`card border ${precheck.pass ? 'border-emerald-300' : 'border-amber-300'}`}>
+          <h3 className="text-lg font-semibold mb-2">Precheck Result</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <div className={`text-3xl font-extrabold ${precheck.pass ? 'text-emerald-700' : 'text-amber-700'}`}>
+                {precheck.pass ? 'Pass' : 'Needs Attention'}
+              </div>
+              <p className="text-sm text-slate-600 mt-1">
+                Must-have coverage: <b>{Math.round((precheck.coverage?.must || 0) * 100)}%</b> &middot; Good-to-have: <b>{Math.round((precheck.coverage?.good || 0) * 100)}%</b>
+              </p>
+              {precheck.checks && precheck.checks.minYearsRequired ? (
+                <p className="text-sm text-slate-600 mt-1">
+                  Experience: {precheck.checks.candidateYears} yrs (req. {precheck.checks.minYearsRequired}+) — {precheck.checks.yearsOk ? 'OK' : 'Not met'}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="md:col-span-2">
+              {(precheck.missing?.must?.length || precheck.missing?.certs?.length) ? (
+                <>
+                  {precheck.missing?.must?.length ? (
+                    <>
+                      <h4 className="font-semibold">Missing must-have skills</h4>
+                      <div className="mt-1 flex flex-wrap gap-2">
+                        {precheck.missing.must.map(s => <span key={s} className="pill">{s}</span>)}
+                      </div>
+                    </>
+                  ) : null}
+                  {precheck.missing?.certs?.length ? (
+                    <>
+                      <h4 className="font-semibold mt-3">Missing required certifications</h4>
+                      <div className="mt-1 flex flex-wrap gap-2">
+                        {precheck.missing.certs.map(s => <span key={s} className="pill">{s}</span>)}
+                      </div>
+                    </>
+                  ) : null}
+                </>
+              ) : (
+                <p className="text-slate-700">All minimum requirements appear present.</p>
+              )}
+
+              {(precheck.notes || []).length ? (
+                <ul className="mt-3 list-disc list-inside text-slate-700">
+                  {precheck.notes.map((n, i) => <li key={i}>{n}</li>)}
+                </ul>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {!precheck.pass && (
+              <button className="btn btn-outline" onClick={() => navigate(ROLES_PATH)}>
+                Edit Role Requirements
+              </button>
+            )}
+            <button className="btn" onClick={() => onRun(true)}>
+              Proceed to AI screening
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ===== AI Screening Results ===== */}
+      {res && (
+        <div className="card border border-slate-200">
+          <h3 className="text-lg font-semibold mb-2">AI Screening Result</h3>
+          <p className="mb-2 text-slate-700">{res.summary}</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h4 className="font-semibold">Matched Must-haves</h4>
+              <ul className="list-disc list-inside text-sm">
+                {res.matched_must?.map((s, i) => <li key={i}>{s}</li>)}
+              </ul>
+
+              <h4 className="font-semibold mt-3">Missing Must-haves</h4>
+              <ul className="list-disc list-inside text-sm text-red-600">
+                {res.missing_must?.map((s, i) => <li key={i}>{s}</li>)}
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold">Matched Good-to-haves</h4>
+              <ul className="list-disc list-inside text-sm">
+                {res.matched_good?.map((s, i) => <li key={i}>{s}</li>)}
+              </ul>
+
+              <h4 className="font-semibold mt-3">Missing Good-to-haves</h4>
+              <ul className="list-disc list-inside text-sm text-red-600">
+                {res.missing_good?.map((s, i) => <li key={i}>{s}</li>)}
+              </ul>
+            </div>
+          </div>
+
+          {res.cv_suggestions?.length ? (
+            <div className="mt-4">
+              <h4 className="font-semibold">Suggestions to improve CV</h4>
+              <ul className="list-disc list-inside text-sm">
+                {res.cv_suggestions.map((s, i) => <li key={i}>{s}</li>)}
+              </ul>
+            </div>
+          ) : null}
+
+          {res.role_specific_gaps?.length ? (
+            <div className="mt-4">
+              <h4 className="font-semibold">Role-specific gaps</h4>
+              <ul className="list-disc list-inside text-sm">
+                {res.role_specific_gaps.map((s, i) => <li key={i}>{s}</li>)}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+      )}
 
       {/* Modal */}
       <ConfirmModal
