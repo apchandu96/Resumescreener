@@ -56,8 +56,6 @@ export default function JobRoles() {
         description: desc,
         mustHaveSkills,
         goodToHaveSkills
-        mustHaveSkills,
-        goodToHaveSkills
       })
 
 
@@ -119,7 +117,6 @@ export default function JobRoles() {
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder="e.g., Frontend Engineer (React)"
-              placeholder="e.g., Frontend Engineer (React)"
               required
             />
           </div>
@@ -143,7 +140,6 @@ export default function JobRoles() {
               className="textarea"
               value={desc}
               onChange={e => setDesc(e.target.value)}
-              placeholder="Describe the responsibilities and list essential (must-have) and preferred (good-to-have) skills."
               placeholder="Describe the responsibilities and list essential (must-have) and preferred (good-to-have) skills."
               required
             />

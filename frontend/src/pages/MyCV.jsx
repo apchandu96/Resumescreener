@@ -141,7 +141,7 @@ export default function MyCV(){
               const isDeepLoading = deepLoadingId === c._id
               const deepErr = deepErrorId === c._id && deep?.error
               const isDeleting = deletingId === c._id
-              const isDeleting = deletingId === c._id
+              
 
               return (
                 <li key={c._id} className="bg-slate-50 rounded-xl p-3">
