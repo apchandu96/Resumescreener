@@ -50,8 +50,11 @@ export default function MyCV(){
         try {
           const report = await atsReportByCandidate(created._id)
           setBasicMap(prev => ({ ...prev, [created._id]: report }))
-        } catch { /* non-fatal; basic report failed */ }
-        } catch { /* non-fatal; basic report failed */ }
+        } catch (err) {
+          // non-fatal; basic report failed
+          console.warn("ATS report failed", err)
+        }
+        
       }
     }catch(err){ setWarning(String(err)) }
     finally{ setLoading(false) }
