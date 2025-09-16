@@ -20,7 +20,7 @@ export default function Screening() {
   const [res, setRes] = useState(null) // combined analysis from backend
   const [loading, setLoading] = useState(false)
   const [warning, setWarning] = useState(null)
-
+  const [history, setHistory] = useState([])
   // Precheck state
   const [precheck, setPrecheck] = useState(null)
   const [prechecking, setPrechecking] = useState(false)

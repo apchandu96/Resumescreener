@@ -36,10 +36,6 @@ export default function JobRoles() {
       return setWarning('Please provide both a role title and the key roles & responsibilities.')
     }
 
-    if (!title?.trim() || !desc?.trim()) {
-      return setWarning('Please provide both a role title and the key roles & responsibilities.')
-    }
-
     setSaving(true); setWarning(null)
     try {
       // Auto-extract skills from the JD
