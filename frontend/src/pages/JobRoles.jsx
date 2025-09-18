@@ -125,12 +125,7 @@ export default function JobRoles() {
                 No company info required — focus on <b>essential</b> and <b>preferred</b> skills.
               </span>
             </div>
-            <div className="flex items-baseline justify-between">
-              <label className="label" htmlFor="desc">Key Roles & Responsibilities</label>
-              <span className="text-xs text-slate-500">
-                No company info required — focus on <b>essential</b> and <b>preferred</b> skills.
-              </span>
-            </div>
+           
             <textarea
               id="desc"
               className="textarea"
