@@ -46,12 +46,12 @@ export default function Register() {
 
       <form onSubmit={onSubmit} className="mt-5 space-y-4">
         <div>
-          <label htmlFor="email" className="label">Email</label>
+          <label htmlFor="email" className="label">User Name</label>
           <input
             id="email"
             type="email"
             className="input"
-            placeholder="you@example.com"
+            placeholder="Mike12"
             autoComplete="email"
             value={email}
             onChange={(e)=>setEmail(e.target.value)}

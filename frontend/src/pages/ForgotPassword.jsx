@@ -35,13 +35,13 @@ export default function ForgotPassword(){
       )}
 
       <form onSubmit={submit} className="space-y-3">
-        <label className="label" htmlFor="email">Email</label>
+        <label className="label" htmlFor="email">User Name</label>
         <input
           id="email"
           className="input w-full"
           value={email}
           onChange={e=>setEmail(e.target.value)}
-          placeholder="you@example.com"
+          placeholder="Mike12"
           autoComplete="email"
         />
         <button className="btn w-full" disabled={loading || !email.trim()}>

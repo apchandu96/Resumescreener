@@ -22,7 +22,7 @@ export default function Login(){
       <h2 className="text-xl font-semibold mb-4">Login</h2>
       {err && <div className="bg-red-100 text-red-600 p-2 mb-3">{err}</div>}
       <form onSubmit={submit} className="space-y-3">
-        <input className="input w-full" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} />
+        <input className="input w-full" placeholder="User Name" value={email} onChange={e=>setEmail(e.target.value)} />
         <input className="input w-full" type="password" placeholder="Password" value={password} onChange={e=>setPassword(e.target.value)} />
         <button className="btn w-full">Login</button>
         <div className="mt-3 text-center">
