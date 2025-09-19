@@ -10,10 +10,10 @@ services:
     volumes:
       - /srv/screening/Resumescreener/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - /srv/screening/Resumescreener/certs:/etc/nginx/certs:ro
-      # If your built frontend lives outside the image, mount it like this:
-      # - /srv/screening/Resumescreener/site:/usr/share/nginx/html:ro
     depends_on:
       - api
+    networks:
+      - resumescreener_net
     restart: unless-stopped
 
   api:
@@ -23,6 +23,8 @@ services:
       - "3000"
     environment:
       - NODE_ENV=production
+    networks:
+      - resumescreener_net
     restart: unless-stopped
 
   mongo:
@@ -30,4 +32,10 @@ services:
     container_name: resumescreener-mongo-1
     expose:
       - "27017"
+    networks:
+      - resumescreener_net
     restart: unless-stopped
+
+networks:
+  resumescreener_net:
+    driver: bridge
