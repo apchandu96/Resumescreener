@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 
 networks:
   resumescreener_net:
@@ -11,9 +11,8 @@ volumes:
 services:
   web:
     build:
-      context: ./web          
-      dockerfile: Dockerfile 
-    image: resumescreener-web  
+      context: ./web
+      dockerfile: Dockerfile
     container_name: resumescreener-web-1
     depends_on:
       - api
@@ -23,7 +22,6 @@ services:
     volumes:
       - /srv/screening/Resumescreener/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - /srv/screening/Resumescreener/nginx/conf.d:/etc/nginx/conf.d:ro
-      # Try mounting individual files instead of the directory
       - /srv/screening/Resumescreener/certs/cert.pem:/etc/nginx/certs/cert.pem:ro
       - /srv/screening/Resumescreener/certs/key.pem:/etc/nginx/certs/key.pem:ro
     networks:
@@ -34,14 +32,12 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile
-    image: resumescreener-api            # (use your API image)
     container_name: resumescreener-api-1
     expose:
       - "3000"                           # internal; Nginx proxies to http://api:3000
     environment:
       - NODE_ENV=production
       - PORT=3000
-      # ensure your API binds 0.0.0.0 internally
     networks:
       - resumescreener_net
     restart: unless-stopped
