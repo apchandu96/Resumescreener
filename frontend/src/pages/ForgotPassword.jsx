@@ -35,16 +35,17 @@ export default function ForgotPassword(){
       )}
 
       <form onSubmit={submit} className="space-y-3">
-        <label className="label" htmlFor="email">User Name</label>
+        <label className="label" htmlFor="email">User name</label>
         <input
           id="email"
           className="input w-full"
           value={email}
           onChange={e=>setEmail(e.target.value)}
-          placeholder="Mike12"
-          autoComplete="email"
+         placeholder="JohnDoe_123"
+             type="text"
+            autoComplete="username"
         />
-        <button className="btn w-full" disabled={loading || !email.trim()}>
+        <button className="btn btn-primary w-full" disabled={loading || !email.trim()}>
           {loading ? 'Generating…' : 'Generate reset token'}
         </button>
       </form>
@@ -67,7 +68,7 @@ export default function ForgotPassword(){
                 </p>
               </div>
               <div>
-                <Link className="btn w-full" to="/resetpassword">
+                <Link className="btn btn-primary w-full" to="/resetpassword">
                   Go to Reset Password
                 </Link>
               </div>

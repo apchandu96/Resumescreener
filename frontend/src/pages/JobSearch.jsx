@@ -110,7 +110,7 @@ function JobAccordionCard({ job, isOpen, onToggle, idx }) {
               </div>
               <div className="mt-2 md:mt-0">
                 <a
-                  className="btn"
+                  className="btn btn-primary"
                   href={job.jobUrl || job.url}
                   target="_blank"
                   rel="noreferrer"
@@ -228,7 +228,7 @@ export default function JobSearch() {
           </div>
           <div className="md:col-span-5">
             <label className="label" htmlFor="loc">
-              Location {detectedCity && <span className="text-xs text-slate-500">(detected: {detectedCity})</span>}
+              Location
             </label>
             <input
               id="loc"
@@ -267,7 +267,7 @@ export default function JobSearch() {
             </select>
           </div>
           <div className="md:col-span-4 flex items-end">
-            <button className="btn w-full md:w-auto" type="submit" disabled={loading}>
+            <button className="btn btn-primary w-full md:w-auto" type="submit" disabled={loading}>
               {loading ? 'Searching…' : 'Search'}
             </button>
           </div>
@@ -278,8 +278,8 @@ export default function JobSearch() {
       <div className="flex items-center justify-between">
         <div className="text-sm text-slate-600">Results: {total}</div>
         <div className="flex gap-2">
-          <button className="btn" onClick={prevPage} disabled={loading || skip === 0}>Prev</button>
-          <button className="btn" onClick={nextPage} disabled={loading || skip + 20 >= total}>Next</button>
+          <button className="btn btn-primary" onClick={prevPage} disabled={loading || skip === 0}>Prev</button>
+          <button className="btn btn-primary" onClick={nextPage} disabled={loading || skip + 20 >= total}>Next</button>
         </div>
       </div>
 

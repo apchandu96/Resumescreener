@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Menu, X, LogOut } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 
 export default function NavBar() {
   const nav = useNavigate()
-  const token = localStorage.getItem('token')
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
   const [open, setOpen] = useState(false)
 
   const logout = () => {
@@ -13,100 +13,104 @@ export default function NavBar() {
     nav('/login')
   }
 
-  const closeMenu = () => setOpen(false)
-
-  // 🔑 function to style active links
-  const linkClass = ({ isActive }) =>
-    `hover:underline ${isActive ? 'text-emerald-400 font-semibold' : ''}`
-
-  const mobileLinkClass = ({ isActive }) =>
-    `block px-2 py-2 rounded hover:bg-slate-700 ${
-      isActive ? 'bg-slate-700 text-emerald-400 font-semibold' : ''
-    }`
+  // Slightly more compact than before to protect space for the tagline + nav
+  const linkBase = 'px-3 py-2 rounded-xl outline-none transition-colors duration-150 text-[16px] md:text-[17px]'
+  const navLink = ({ isActive }) =>
+    `${linkBase} ${isActive ? 'bg-[#ffffff] text-black' : 'hover:bg-[#ffffff] text-black'}`
 
   return (
-    <header className="bg-slate-800 text-white">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          {/* Brand */}
-          <NavLink
-            to="/"
-            className="flex items-center gap-2 font-bold text-lg"
-            onClick={closeMenu}
-          >
-            <img
-              src="/images/logo.png"
-              alt="CV Craft Logo"
-              className="h-8 w-8 object-contain"
-            />
-            <span>CV Craft</span>
-          </NavLink>
-
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-4 text-sm">
-            {token ? (
-              <>
-                <NavLink to="/cv" className={linkClass}>My CV</NavLink>
-                <NavLink to="/roles" className={linkClass}>Job Roles</NavLink>
-                <NavLink to="/screening" className={linkClass}>Screening</NavLink>
-                <NavLink to="/jobs" className={linkClass}>Job Search</NavLink>
-                <button
-                  onClick={logout}
-                  className="ml-2 flex items-center gap-1 bg-red-500 hover:bg-red-600 px-3 py-1 rounded"
-                >
-                  <LogOut size={16} />
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <NavLink to="/login" className={linkClass}>Login</NavLink>
-                <NavLink to="/register" className={linkClass}>Register</NavLink>
-                <NavLink to="/jobs" className={linkClass}>Job Search</NavLink>
-              </>
-            )}
-          </nav>
-
-          {/* Mobile burger */}
+    <header role="banner" className="sticky top-0 z-40 navbar border-b border-[#d2460e]">
+      <nav
+        className="container grid grid-cols-[auto,1fr,auto] items-center gap-4 min-h-16 md:min-h-20 py-1"
+        role="navigation"
+        aria-label="Primary"
+      >
+        {/* LEFT: burger + logo (never shrink) */}
+        <div className="flex items-center gap-3 flex-shrink-0">
           <button
             type="button"
-            className="md:hidden inline-flex items-center justify-center rounded-lg p-2 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-white/50"
-            aria-controls="mobile-menu"
-            aria-expanded={open}
-            onClick={() => setOpen(prev => !prev)}
+            className="md:hidden inline-flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[#ff6a33]"
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-controls="primary-menu"
+            aria-expanded={open ? 'true' : 'false'}
+            onClick={() => setOpen(v => !v)}
           >
-            <span className="sr-only">Toggle navigation</span>
-            {open ? <X size={24} /> : <Menu size={24} />}
+            {open ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
           </button>
+
+          <NavLink to="/" className="logo-groove flex items-center gap-2">
+            <img
+              src="/images/logo.png"
+              alt="CV Craft logo"
+              className="h-16 sm:h-20 md:h-24 w-auto object-contain"
+              title='Home'
+            />
+            <span className="sr-only">CV Craft</span>
+          </NavLink>
         </div>
 
-        {/* Mobile menu */}
-        <div
-          id="mobile-menu"
-          className={`md:hidden transition-all duration-200 ease-out ${
-            open ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-          } overflow-hidden`}
-        >
-          <div className="pt-3 pb-4 space-y-2 text-sm">
-            {token ? (
-              <>
-                <NavLink onClick={closeMenu} to="/cv" className={mobileLinkClass}>My CV</NavLink>
-                <NavLink onClick={closeMenu} to="/roles" className={mobileLinkClass}>Job Roles</NavLink>
-                <NavLink onClick={closeMenu} to="/screening" className={mobileLinkClass}>Screening</NavLink>
-                <NavLink onClick={closeMenu} to="/jobs" className={mobileLinkClass}>Job Search</NavLink>
+        {/* MIDDLE: Tagline (grows, shows fully, wraps to two lines if needed) */}
+        <div className="hidden md:block flex-1 min-w-0">
+          <div
+            className="inline-flex items-start gap-2 rounded-xl bg-white/95 text-[#0C022F] border border-slate-200 shadow-sm px-3 py-2 leading-snug max-w-[680px] whitespace-normal"
+          >
+            {/* slim brand accent */}
+           
+            <span className="text-base md:text-[17px] font-semibold">
+              About to apply? <span className="font-medium">Stop here first.</span>
+            </span>
+              </div>
+        </div>
+
+        {/* RIGHT: nav links (never shrink) */}
+        <ul className="hidden md:flex items-center gap-2 flex-shrink-0" id="primary-menu">
+          {token ? (
+            <>
+              <li><NavLink to="/cv" className={navLink}>My CV</NavLink></li>
+              <li><NavLink to="/roles" className={navLink}>Roles</NavLink></li>
+              <li><NavLink to="/screening" className={navLink}>Screening</NavLink></li>
+              <li><NavLink to="/jobs" className={navLink}>Job Search</NavLink></li>
+              <li>
                 <button
                   onClick={logout}
-                  className="mt-2 w-full flex items-center gap-2 text-left px-2 py-2 rounded bg-red-500 hover:bg-red-600"
+                  className="px-3 py-2 rounded-xl hover:bg-[#f1101a]"
                 >
-                  <LogOut size={16} />
                   Logout
                 </button>
+              </li>
+            </>
+          ) : (
+            <>
+              <li><NavLink to="/jobs" className={navLink}>Job Search</NavLink></li>
+              <li><NavLink to="/login" className="btn btn-secondary">Login</NavLink></li>
+              <li><NavLink to="/register" className="btn btn-secondary">Register</NavLink></li>
+            </>
+          )}
+        </ul>
+      </nav>
+
+      {/* Mobile drawer */}
+      <div className={`md:hidden border-t border-[#d2460e] ${open ? 'block' : 'hidden'}`} id="primary-menu">
+        <div className="container py-3">
+          {/* Tagline visible on mobile too (below logo) */}
+          <p className="mb-3 text-[15px] font-semibold text-[#0C022F]">
+            About to apply? <span className="font-medium">Stop here first.</span>
+          </p>
+
+          <div className="grid gap-2 text-[17px]" role="menu">
+            {token ? (
+              <>
+                <NavLink onClick={() => setOpen(false)} to="/cv" className={navLink}>My CV</NavLink>
+                <NavLink onClick={() => setOpen(false)} to="/roles" className={navLink}>Roles</NavLink>
+                <NavLink onClick={() => setOpen(false)} to="/screening" className={navLink}>Screening</NavLink>
+                <NavLink onClick={() => setOpen(false)} to="/jobs" className={navLink}>Job Search</NavLink>
+                <button onClick={logout} className="px-3 py-2 rounded-xl text-left hover:bg-[#ff6a33]">Logout</button>
               </>
             ) : (
               <>
-                <NavLink onClick={closeMenu} to="/login" className={mobileLinkClass}>Login</NavLink>
-                <NavLink onClick={closeMenu} to="/register" className={mobileLinkClass}>Register</NavLink>
-                <NavLink onClick={closeMenu} to="/jobs" className={mobileLinkClass}>Job Search</NavLink>
+                <NavLink onClick={() => setOpen(false)} to="/jobs" className={navLink}>Job Search</NavLink>
+                <NavLink onClick={() => setOpen(false)} to="/login" className="btn btn-secondary">Login</NavLink>
+                <NavLink onClick={() => setOpen(false)} to="/register" className="btn btn-secondary">Register</NavLink>
               </>
             )}
           </div>

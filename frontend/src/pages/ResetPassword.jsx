@@ -76,14 +76,15 @@ export default function ResetPassword(){
 
       <form onSubmit={submit} className="space-y-3">
         <div>
-          <label className="label" htmlFor="email">Email</label>
+          <label className="label" htmlFor="email">User name</label>
           <input
             id="email"
             className="input w-full"
             value={email}
             onChange={e=>setEmail(e.target.value)}
-            placeholder="you@example.com"
-            autoComplete="email"
+            placeholder="JohnDoe_123"
+            type="text"
+            autoComplete="username"
           />
         </div>
 
@@ -149,7 +150,7 @@ export default function ResetPassword(){
           </div>
         </div>
 
-        <button className="btn w-full" disabled={loading}>
+        <button className="btn btn-primary w-full" disabled={loading}>
           {loading ? 'Updating…' : 'Update password'}
         </button>
       </form>

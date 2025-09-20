@@ -172,14 +172,14 @@ export default function Screening() {
         </div>
 
         <div className="flex flex-wrap gap-3 mt-4">
-          <button className="btn" onClick={() => onRun(false)} disabled={loading || noRoles}>
+          <button className="btn btn-primary" onClick={() => onRun(false)} disabled={loading || noRoles}>
             {loading ? 'Scoring…' : 'Run screening'}
           </button>
-          <button className="btn btn-outline" onClick={runPrecheck} disabled={prechecking || !candidateId || !roleId}>
+          <button className="btn btn btn-primary-outline" onClick={runPrecheck} disabled={prechecking || !candidateId || !roleId}>
             {prechecking ? 'Checking…' : (precheck ? 'Re-run Precheck' : 'Run Precheck (free)')}
           </button>
           {precheck && (
-            <button className="btn btn-ghost" onClick={clearPrecheck} title="Clear cached precheck">
+            <button className="btn btn-primary btn-ghost" onClick={clearPrecheck} title="Clear cached precheck">
               Clear Precheck
             </button>
           )}
@@ -240,11 +240,11 @@ export default function Screening() {
 
           <div className="mt-4 flex flex-wrap gap-2">
             {!precheck.pass && (
-              <button className="btn btn-outline" onClick={() => navigate(ROLES_PATH)}>
+              <button className="btn btn btn-primary-outline" onClick={() => navigate(ROLES_PATH)}>
                 Edit Role Requirements
               </button>
             )}
-            <button className="btn" onClick={() => onRun(true)}>
+            <button className="btn btn-primary" onClick={() => onRun(true)}>
               Proceed to AI screening
             </button>
           </div>
@@ -328,8 +328,8 @@ function ConfirmModal({ open, title, description, confirmText = 'Confirm', cance
         <h3 className="text-lg font-semibold">{title}</h3>
         <p className="mt-2 text-sm text-slate-600">{description}</p>
         <div className="mt-4 flex items-center justify-end gap-2">
-          <button className="btn btn-sm btn-outline" onClick={onCancel}>{cancelText}</button>
-          <button className="btn btn-sm bg-slate-900 text-white hover:bg-slate-800" onClick={onConfirm}>{confirmText}</button>
+          <button className="btn btn-sm btn btn-primary-outline" onClick={onCancel}>{cancelText}</button>
+          <button className="btn btn btn-primary-sm bg-slate-900 text-white hover:bg-slate-800" onClick={onConfirm}>{confirmText}</button>
         </div>
       </div>
     </div>

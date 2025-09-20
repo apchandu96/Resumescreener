@@ -46,12 +46,12 @@ export default function Register() {
 
       <form onSubmit={onSubmit} className="mt-5 space-y-4">
         <div>
-          <label htmlFor="email" className="label">User Name</label>
+          <label htmlFor="email" className="label">Email</label>
           <input
             id="email"
             type="email"
             className="input"
-            placeholder="Mike12"
+            placeholder="you@example.com"
             autoComplete="email"
             value={email}
             onChange={(e)=>setEmail(e.target.value)}
@@ -95,7 +95,7 @@ export default function Register() {
           />
         </div>
 
-        <button className="btn w-full" disabled={loading}>
+        <button className="btn btn-primary w-full" disabled={loading}>
           {loading ? 'Creating account...' : 'Create account'}
         </button>
       </form>

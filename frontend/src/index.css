@@ -11,3 +11,119 @@
   .textarea{@apply w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400 min-h-[140px]}
   .pill{@apply inline-block rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700 mr-2 mb-2}
 }
+
+/* === Brand & A11y Utilities (Orange #FF5010 / Blue #0C022F) === */
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--ring, #0C022F); outline-offset: 2px; }
+
+/* Keep skip link if used */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 50;
+  background: #fff;
+  color: #000;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;        /* ~rounded-xl */
+  box-shadow: 0 2px 10px rgba(0,0,0,.06); /* shadow-soft */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+.app-shell { @apply min-h-screen flex flex-col bg-slate-50 text-slate-900; }
+.app-main  { @apply flex-1 container mx-auto px-4 py-6; }
+
+/* Buttons (Primary solid blue, Secondary outline blue) */
+.btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 font-medium transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed; }
+.btn-primary { background-color: #100b23; color: #ffffff; }
+.btn-primary:hover { background-color: #1b1540; }
+.btn-primary:active { background-color: #ffffff; }
+.btn-primary:focus-visible { box-shadow: 0 0 0 2px white, 0 0 0 4px #0C022F; }
+
+.btn-secondary { background-color: transparent; color: #0C022F; border: 2px solid #0C022F; }
+.btn-secondary:hover { background-color: #efeef6; color: #0C022F; border-color: #1b1540; }
+.btn-secondary:focus-visible { box-shadow: 0 0 0 2px white, 0 0 0 4px #0C022F; }
+
+.btn-ghost { @apply inline-flex items-center gap-2 px-3 py-2 rounded-xl text-slate-800 hover:bg-slate-100; }
+
+/* Forms */
+.label { @apply block text-sm font-medium text-slate-800 mb-1; }
+.input { @apply w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0C022F] bg-white; }
+.textarea { @apply w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0C022F] min-h-[140px] bg-white; }
+
+/* Surfaces */
+.card { @apply bg-white rounded-2xl shadow-soft border border-slate-200 p-5; }
+.pill { @apply inline-block rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-800 mr-2 mb-2; }
+
+/* Navbar/Footer (Orange bg with black text) */
+.navbar { background-color: #ff5010f4; color: #111827; }
+.navbar a { color: #111827; }
+.navbar a:hover { color: #000000; background-color: #fff5f1; }
+.footerbar { background-color: #ff5010f4; color: #111827; }
+.footerbar a { color: #111827; }
+.footerbar a:hover { color: #000000; background-color: #fff5f1; }
+
+/* Global readability upgrades */
+@layer base {
+  /* Bump the root font-size: 18px (affects all rem-based text like text-base) */
+  html { font-size: 18px; }
+
+  /* Make all body text a bit thicker for readability */
+  body { @apply font-medium; } /* 500 weight */
+}
+
+/* Utility classes you can apply to any container/page */
+@layer components {
+  /* Slight size bump + relaxed leading; use on any wrapper */
+  .readable { @apply text-[1.0625rem] md:text-[1.125rem] leading-relaxed; } /* ~17px / 18px */
+
+  /* Make text thicker where needed (headings or key content) */
+  .thicker { @apply font-semibold; } /* 600 weight */
+}
+@layer components {
+  /* Clickable, raised “groove” chip for the logo */
+  .logo-groove {
+    @apply relative  border px-1 py-1 bg-white/90 backdrop-blur cursor-pointer transition-all;
+    border-color: #0C022F; /* brand blue */
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.65),
+      0 1px 2px rgba(0,0,0,0.06),
+      0 10px 18px rgba(12,2,47,0.18);
+  }
+  .logo-groove:hover {
+    transform: translateY(-2px);
+    background-image: linear-gradient(to bottom, rgba(255,255,255,0.6), rgba(255,255,255,0));
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.7),
+      0 2px 4px rgba(0,0,0,0.10),
+      0 14px 28px rgba(12,2,47,0.25);
+  }
+  .logo-groove:active {
+    transform: translateY(0);
+    box-shadow:
+      inset 0 1px 0 rgba(0,0,0,0.05),
+      0 1px 2px rgba(0,0,0,0.12),
+      0 6px 12px rgba(12,2,47,0.18);
+  }
+  .logo-groove:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px #fff,
+      0 0 0 4px #0C022F,
+      inset 0 2px 0 rgba(255,255,255,0.65),
+      0 10px 18px rgba(12,2,47,0.18);
+  }
+}

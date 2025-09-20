@@ -119,15 +119,15 @@ export default function MyCV(){
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="label" htmlFor="name">Your name</label>
-              <input id="name" className="input" value={name} onChange={e=>setName(e.target.value)} placeholder="e.g., Jane Doe" required/>
+              <label className="label" htmlFor="name">Title</label>
+              <input id="name" className="input" value={name} onChange={e=>setName(e.target.value)} placeholder="e.g., Backend developer CV" required/>
             </div>
             <div>
-              <label className="label" htmlFor="years">Years of experience</label>
+              <label className="label" htmlFor="years">Years of experience (optional)</label>
               <input id="years" className="input" type="number" min="0" step="1" value={years} onChange={e=>setYears(e.target.value)} placeholder="e.g., 4" required/>
             </div>
           </div>
-          <button className="btn btn-primary" disabled={loading}>{loading?'Uploading...':'Upload CV'}</button>
+          <button className="btn btn-primary btn-primary" disabled={loading}>{loading?'Uploading...':'Upload CV'}</button>
         </form>
       </div>
 
@@ -308,8 +308,8 @@ function ConfirmModal({ open, title, description, confirmText = 'Confirm', cance
         <h3 className="text-lg font-semibold">{title}</h3>
         <p className="mt-2 text-sm text-slate-600">{description}</p>
         <div className="mt-4 flex items-center justify-end gap-2">
-          <button className="btn btn-sm btn-outline" onClick={onCancel}>{cancelText}</button>
-          <button className="btn btn-sm bg-red-600 text-white hover:bg-red-700" onClick={onConfirm}>{confirmText}</button>
+          <button className="btn btn-sm btn btn-primary-outline" onClick={onCancel}>{cancelText}</button>
+          <button className="btn btn btn-primary-sm bg-red-600 text-white hover:bg-red-700" onClick={onConfirm}>{confirmText}</button>
         </div>
       </div>
     </div>
