@@ -10,7 +10,10 @@ volumes:
 
 services:
   web:
-    image: resumescreener-web            # (use your built image)
+    build:
+      context: ./web          
+      dockerfile: Dockerfile 
+    image: resumescreener-web  
     container_name: resumescreener-web-1
     depends_on:
       - api
@@ -28,6 +31,9 @@ services:
     restart: unless-stopped
 
   api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
     image: resumescreener-api            # (use your API image)
     container_name: resumescreener-api-1
     expose:
