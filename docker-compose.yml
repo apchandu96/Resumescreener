@@ -11,8 +11,8 @@ volumes:
 services:
   web:
     build:
-      context: ./web
-      dockerfile: Dockerfile
+      context: ./frontend            # was ./web
+      dockerfile: Dockerfile         # change if it’s named differently
     container_name: resumescreener-web-1
     depends_on:
       - api
@@ -30,14 +30,14 @@ services:
 
   api:
     build:
-      context: ./api
-      dockerfile: Dockerfile
+      context: ./backend             # was ./api
+      dockerfile: Dockerfile         # change if it’s named differently
     container_name: resumescreener-api-1
     expose:
-      - "3000"     # Nginx proxies to http://api:3000
+      - "3000"
     environment:
       - NODE_ENV=production
-      - PORT=3000  # ensure your server binds 0.0.0.0
+      - PORT=3000
     networks:
       - resumescreener_net
     restart: unless-stopped

@@ -42,4 +42,7 @@ jobs:
             git -c http.extraheader="Authorization: Basic ${AUTH}" fetch --all --prune
             git reset --hard origin/main
 
-            docker compose up -d --build --remove-orphans
+            docker compose down --remove-orphans
+            docker builder prune -af
+            docker compose build --no-cache --pull
+            docker compose up -d
