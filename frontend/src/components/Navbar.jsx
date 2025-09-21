@@ -40,7 +40,7 @@ export default function NavBar() {
 
           <NavLink to="/" className="logo-groove flex items-center gap-2">
             <img
-              src="/images/logo.png"
+              src="/images/CVcraftlogo.png"
               alt="CV Craft logo"
               className="h-16 sm:h-20 md:h-24 w-auto object-contain"
               title='Home'
