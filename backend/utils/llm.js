@@ -84,7 +84,7 @@ ${(candidate.resumeText||'').slice(0, 8000)}`
     method: 'POST',
     headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         { role: 'system', content: 'Return strict JSON only.' },
         { role: 'user', content: prompt }
@@ -123,7 +123,7 @@ ${resumeText.slice(0, 12000)}`
     method: "POST",
     headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
+      model: "gpt-4.1-mini",
       messages: [
         { role: "system", content: "Return strict JSON only. No explanations." },
         { role: "user", content: prompt }
