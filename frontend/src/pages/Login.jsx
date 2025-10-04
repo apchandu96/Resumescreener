@@ -26,7 +26,8 @@ export default function Login(){
         <input className="input w-full" type="password" placeholder="Password" value={password} onChange={e=>setPassword(e.target.value)} />
         <button className="btn btn-primary w-full">Login</button>
         <div className="mt-3 text-center">
-  <a href="/forgot" className="text-sm text-slate-600 hover:underline">Forgot password?</a>
+         <div className="mb-2 text-sm text-slate-600">New user? <a href="/register" className="text-sm text-slate-600 hover:underline">Create an account</a></div> 
+       <a href="/forgot" className="text-sm text-slate-600 hover:underline">Forgot password?</a>
 </div>
       </form>
     </div>
