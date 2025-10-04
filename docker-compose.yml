@@ -34,11 +34,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      # Use the service name "mongo" for in-network DNS
-      - MONGO_URI=mongodb://appuser:${MONGO_PASS}@mongo:27017/resumescreener?authSource=admin&retryWrites=true&w=majority
-    networks: [resumescreener_net]
-    depends_on: [mongo]
     restart: unless-stopped
+    networks:
+      - resumescreener_net
 
   mongo:
     image: mongo:6
@@ -47,7 +45,6 @@ services:
     volumes:
       - mongo_data:/data/db
     # SAFE: only reachable on the server via 127.0.0.1
-    ports:
-      - "127.0.0.1:27017:27017"
-    networks: [resumescreener_net]
+    networks:
+      - resumescreener_net
     restart: unless-stopped
