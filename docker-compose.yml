@@ -1,3 +1,5 @@
+# (no "version" key needed for modern Docker Compose)
+
 networks:
   resumescreener_net:
     name: resumescreener_net
@@ -22,7 +24,8 @@ services:
       - /srv/screening/Resumescreener/nginx/conf.d:/etc/nginx/conf.d:ro
       - /srv/screening/Resumescreener/certs/cert.pem:/etc/nginx/certs/cert.pem:ro
       - /srv/screening/Resumescreener/certs/key.pem:/etc/nginx/certs/key.pem:ro
-    networks: [resumescreener_net]
+    networks:
+      - resumescreener_net
     restart: unless-stopped
 
   api:
@@ -30,13 +33,18 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: resumescreener-api-1
-    expose: ["3000"]
+    expose:
+      - "3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
-    restart: unless-stopped
+      # Use the in-network hostname "mongo"
+      - MONGO_URI=mongodb://appuser:${MONGO_PASS}@mongo:27017/resumescreener?authSource=admin&retryWrites=true&w=majority
+    depends_on:
+      - mongo
     networks:
       - resumescreener_net
+    restart: unless-stopped
 
   mongo:
     image: mongo:6
@@ -44,7 +52,9 @@ services:
     command: ["--auth", "--bind_ip_all"]
     volumes:
       - mongo_data:/data/db
-    # SAFE: only reachable on the server via 127.0.0.1
+    # Only exposed to the host as 127.0.0.1 for admin access
+    ports:
+      - "127.0.0.1:27017:27017"
     networks:
       - resumescreener_net
     restart: unless-stopped
