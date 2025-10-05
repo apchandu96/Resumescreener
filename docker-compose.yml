@@ -38,8 +38,6 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      # Use the in-network hostname "mongo"
-      - MONGO_URI=mongodb://appuser:${MONGO_PASS}@mongo:27017/resumescreener?authSource=admin&retryWrites=true&w=majority
     depends_on:
       - mongo
     networks:
@@ -49,12 +47,9 @@ services:
   mongo:
     image: mongo:6
     container_name: resumescreener-mongo-1
-    command: ["--auth", "--bind_ip_all"]
     volumes:
       - mongo_data:/data/db
     # Only exposed to the host as 127.0.0.1 for admin access
-    ports:
-      - "127.0.0.1:27017:27017"
     networks:
       - resumescreener_net
     restart: unless-stopped
