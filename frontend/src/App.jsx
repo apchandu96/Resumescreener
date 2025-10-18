@@ -13,6 +13,13 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white readable">
+      <div
+        role="note"
+        aria-label="POC Notice"
+        className="bg-amber-100 text-amber-900 border-b border-amber-300 text-center text-xs sm:text-sm py-2 px-4"
+      >
+        This site is a non-commercial proof of concept for demonstration only.
+      </div>
       <NavBar />
       <main
         id="main-content"
