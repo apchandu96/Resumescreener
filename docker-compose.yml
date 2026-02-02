@@ -49,7 +49,6 @@ services:
     container_name: resumescreener-mongo-1
     volumes:
       - mongo_data:/data/db
-    # Only exposed to the host as 127.0.0.1 for admin access
     networks:
       - resumescreener_net
     restart: unless-stopped
